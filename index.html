@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>我的影视 App</title>
+
   <style>
     * {
       box-sizing: border-box;
@@ -12,7 +13,7 @@
 
     body {
       margin: 0;
-      padding: 20px;
+      padding: 18px;
       background: #10131c;
       color: white;
       font-family: Arial, sans-serif;
@@ -25,113 +26,197 @@
 
     .search {
       width: 100%;
-      padding: 13px;
+      padding: 14px;
       border: 0;
       border-radius: 10px;
       font-size: 16px;
+      margin: 10px 0 18px;
     }
 
     .categories {
       display: flex;
-      gap: 10px;
-      margin: 20px 0;
+      gap: 8px;
+      overflow-x: auto;
+      margin-bottom: 18px;
     }
 
     .categories button {
-      flex: 1;
-      padding: 12px 5px;
+      flex-shrink: 0;
+      padding: 11px 17px;
       border: 0;
-      border-radius: 8px;
+      border-radius: 20px;
       background: #292f40;
       color: white;
+      font-size: 14px;
     }
 
-    .categories button:focus {
-      background: #e6a800;
-      color: black;
+    .categories button.active {
+      background: #ffcc33;
+      color: #171717;
+      font-weight: bold;
     }
 
-    .card {
-      padding: 18px;
-      margin-bottom: 12px;
-      border-radius: 12px;
-      background: #202638;
-    }
-
-    .card h3 {
-      margin-top: 0;
-    }
-
-    .note {
+    .count {
       color: #aeb7ca;
       font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .movie {
+      background: #202638;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .movie h3 {
+      margin: 0 0 8px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 9px;
+      background: #343e56;
+      color: #ffcc33;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .empty {
+      text-align: center;
+      color: #aeb7ca;
+      padding: 35px 10px;
+    }
+
+    footer {
+      text-align: center;
+      color: #778198;
+      font-size: 12px;
+      margin-top: 25px;
     }
   </style>
 </head>
+
 <body>
 
   <h1>🎬 我的影视 App</h1>
 
   <input
     class="search"
+    id="search"
     type="text"
     placeholder="搜索电影、电视剧、动漫..."
-    id="search"
   >
 
-  <div class="categories">
-    <button onclick="showCategory('全部')">全部</button>
-    <button onclick="showCategory('电影')">电影</button>
-    <button onclick="showCategory('电视剧')">电视剧</button>
-    <button onclick="showCategory('动漫')">动漫</button>
+  <div class="categories" id="categories">
+    <button class="active" data-category="全部">全部</button>
+    <button data-category="电影">电影</button>
+    <button data-category="电视剧">电视剧</button>
+    <button data-category="动漫">动漫</button>
+    <button data-category="综艺">综艺</button>
   </div>
 
-  <div id="movies">
-    <div class="card" data-category="电影">
+  <div class="count" id="count"></div>
+
+  <div id="movieList">
+
+    <div class="movie" data-category="电影">
       <h3>🎥 电影专区</h3>
-      <p>这里将展示电影内容。</p>
+      <span class="tag">电影</span>
+      <p>这里展示电影内容。</p>
     </div>
 
-    <div class="card" data-category="电视剧">
+    <div class="movie" data-category="电视剧">
       <h3>📺 电视剧专区</h3>
-      <p>这里将展示电视剧内容。</p>
+      <span class="tag">电视剧</span>
+      <p>这里展示电视剧内容。</p>
     </div>
 
-    <div class="card" data-category="动漫">
+    <div class="movie" data-category="动漫">
       <h3>🍥 动漫专区</h3>
-      <p>这里将展示动漫内容。</p>
+      <span class="tag">动漫</span>
+      <p>这里展示动漫内容。</p>
     </div>
+
+    <div class="movie" data-category="综艺">
+      <h3>🎤 综艺专区</h3>
+      <span class="tag">综艺</span>
+      <p>这里展示综艺节目。</p>
+    </div>
+
   </div>
 
-  <p class="note">
-    我的第一个影视 App · 正在学习制作中
-  </p>
+  <footer>
+    我的影视 App · 第四阶段
+  </footer>
 
   <script>
-    function showCategory(category) {
-      const cards = document.querySelectorAll('.card');
+    let currentCategory = "全部";
 
-      cards.forEach(card => {
-        card.style.display =
-          category === '全部' ||
-          card.dataset.category === category
-            ? 'block'
-            : 'none';
+    const buttons = document.querySelectorAll(
+      ".categories button"
+    );
+
+    const search = document.getElementById("search");
+
+    const movies = document.querySelectorAll(".movie");
+
+    const count = document.getElementById("count");
+
+    function filterMovies() {
+      const keyword = search.value.trim().toLowerCase();
+
+      let visibleCount = 0;
+
+      movies.forEach(movie => {
+        const category = movie.dataset.category;
+
+        const matchesCategory =
+          currentCategory === "全部" ||
+          category === currentCategory;
+
+        const matchesSearch =
+          movie.innerText.toLowerCase().includes(keyword);
+
+        const visible = matchesCategory && matchesSearch;
+
+        movie.style.display = visible ? "block" : "none";
+
+        if (visible) visibleCount++;
       });
+
+      count.textContent =
+        "当前显示 " + visibleCount + " 个分类内容";
+
+      document.getElementById("empty").style.display =
+        visibleCount === 0 ? "block" : "none";
     }
 
-    document.getElementById('search')
-      .addEventListener('input', function() {
-        const keyword = this.value.toLowerCase();
+    buttons.forEach(button => {
+      button.addEventListener("click", function() {
+        buttons.forEach(item =>
+          item.classList.remove("active")
+        );
 
-        document.querySelectorAll('.card')
-          .forEach(card => {
-            card.style.display =
-              card.innerText.toLowerCase().includes(keyword)
-                ? 'block'
-                : 'none';
-          });
+        this.classList.add("active");
+
+        currentCategory = this.dataset.category;
+
+        filterMovies();
       });
+    });
+
+    search.addEventListener("input", filterMovies);
+
+    const empty = document.createElement("div");
+    empty.id = "empty";
+    empty.className = "empty";
+    empty.textContent = "没有找到相关内容";
+    empty.style.display = "none";
+
+    document.getElementById("movieList").appendChild(empty);
+
+    filterMovies();
   </script>
 
 </body>
